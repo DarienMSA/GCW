@@ -1,0 +1,35 @@
+body {
+    background-image: url(../Assets/Imagenes/fondo.jpg);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+    margin: 0;
+    height: 100%;
+    overflow: hidden
+}
+
+.home-buttons{
+    width:75%;
+    transition: transform 0.5s;
+}
+
+.home-buttons:hover{
+    transform: scale(1.2);
+    transition: transform 0.5s;
+}
+
+.config-button{
+    margin-top:535px;
+    margin-left:120px;
+    transform:rotate(-15deg);
+    transition: transform 0.5s;
+    width:10%;
+    height:10%;
+}
+
+.config-button:hover{
+    transform: rotate(90deg) scale(1.2);
+    
+    transition: transform 0.5s;
+}

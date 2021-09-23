@@ -11,8 +11,10 @@ class EnemyClass {
     updateEnemy() {
         if (!this.enemy.alive)
             return;
-        let disX = cube.position.x - this.enemy.position.x;
-        let disZ = cube.position.z - this.enemy.position.z;
+        var MainChar = scene.getObjectByName("Main_Char");
+        
+        let disX = MainChar.position.x - this.enemy.position.x;
+        let disZ = MainChar.position.z - this.enemy.position.z;
 
         var hyp = Math.sqrt(disX * disX + disZ * disZ);
         //if(hyp < 20){
@@ -22,14 +24,14 @@ class EnemyClass {
         this.enemy.position.x += disX * 0.5 * .1;
         this.enemy.position.z += disZ * 0.5 * .1;
 
-        this.enemy.lookAt(cube.position)
+        this.enemy.lookAt(MainChar.position)
         //}
     }
 
     hitByBullet(b, scene) {
         if (!this.enemy.alive)
             return;
-        if (b.position.x >= this.enemy.position.x - 0.8 && b.position.x <= this.enemy.position.x + 0.8 &&
+        if (b.position.x >= this.enemy.position.x - 5 && b.position.x <= this.enemy.position.x + 5 &&
             b.position.z >= this.enemy.position.z - 5 && b.position.z <= this.enemy.position.z + 5) {
             console.log(this.enemy.position);
             b.alive = false;
@@ -107,6 +109,7 @@ loader.load('../Assets/Modelos/EnemyAnt.fbx', function (EnemyAnt) {
 loader.load('../Assets/Modelos/Character/Walking.fbx', function (MainChar) {
     MainChar.mixer = new THREE.AnimationMixer(MainChar);
     MainChar.scale.set(2, 2, 2);
+    MainChar.name = "Main_Char";
     //MainChar.position.y = 1;
     //MainChar.rotation.x= THREE.Math.degToRad(90);
     var action = MainChar.mixer.clipAction(MainChar.animations[0]);
@@ -250,30 +253,30 @@ function onDocumentMouseMove(event) {
 
 
 function onDocumentKeyDown(event) {
-
+    let MainChar = scene.getObjectByName("Main_Char");
     switch (event.code) {
         case 'KeyW':
-
+            MainChar.rotation.y = 135;
             moveForward = true;
             break;
 
         case 'KeyA':
-
+            MainChar.rotation.y = -90;
             moveLeft = true;
             break;
 
         case 'KeyS':
-
+            MainChar.rotation.y = 0;
             moveBackward = true;
             break;
 
         case 'KeyD':
-
+            MainChar.rotation.y = 90;
             moveRight = true;
             break;
 
         case 'ArrowUp':
-
+            MainChar.rotation.y = 135;
             spawnBullet(new THREE.Vector3(
                 0,
                 0,
@@ -282,7 +285,7 @@ function onDocumentKeyDown(event) {
             break;
 
         case 'ArrowDown':
-
+            MainChar.rotation.y = 0;
             spawnBullet(new THREE.Vector3(
                 0,
                 0,
@@ -290,7 +293,7 @@ function onDocumentKeyDown(event) {
             ))
             break;
         case 'ArrowLeft':
-
+            MainChar.rotation.y = -90;
             spawnBullet(new THREE.Vector3(
                 -1 * 0.75,
                 0,
@@ -298,6 +301,7 @@ function onDocumentKeyDown(event) {
             ))
             break;
         case 'ArrowRight':
+            MainChar.rotation.y = 90;
             spawnBullet(new THREE.Vector3(
                 1 * 0.75,
                 0,
@@ -311,27 +315,30 @@ function onDocumentKeyDown(event) {
 
 
 function onDocumentKeyUp(event) {
-
+    
     switch (event.code) {
 
 
         case 'KeyW':
-
+            
             moveForward = false;
             break;
 
 
         case 'KeyA':
+            
             moveLeft = false;
             break;
 
 
         case 'KeyS':
+            
             moveBackward = false;
             break;
 
 
         case 'KeyD':
+            
             moveRight = false;
             break;
 
@@ -340,6 +347,13 @@ function onDocumentKeyUp(event) {
     }
 
 }
+
+$(window).blur(function(){
+    moveRight = false;
+    moveBackward = false;
+    moveLeft = false;
+    moveForward = false;
+  });
 
 function animate() {
     requestAnimationFrame(animate);
@@ -357,11 +371,17 @@ function animate() {
                 objs[i].update(deltaTime);
             }
         }
-        if (Main_Objs.length > 0) {
-            for (var i = 0; i < Main_Objs.length; i++) {
-                Main_Objs[i].update(deltaTime);
+        if(!moveForward && !moveBackward && !moveRight && !moveLeft){
+            
+        }else{
+            if (Main_Objs.length > 0) {
+
+                for (var i = 0; i < Main_Objs.length; i++) {
+                    Main_Objs[i].update(deltaTime);
+                }
             }
         }
+        
         if((deltaTime % 2) ==  0){
 
             
@@ -379,17 +399,21 @@ function animate() {
         //for(i = 0; i < enemies.length; i++) { enemies[i].updateEnemy(); }
 
         if (moveForward) {
-            cube.position.z -= 2.7 * .1;
+            
+            MainChar.position.z -= 2.7 * .1;
         }
         if (moveBackward) {
-            cube.position.z += 2.7 * .1;
+            
+            MainChar.position.z += 2.7 * .1;
         }
 
         if (moveRight) {
-            cube.position.x += 2.7 * .1;
+            
+            MainChar.position.x += 2.7 * .1;
         }
         if (moveLeft) {
-            cube.position.x -= 2.7 * .1;
+            
+            MainChar.position.x -= 2.7 * .1;
         }
 
         for (var index = 0; index < bullets.length; index += 1) {
@@ -416,11 +440,12 @@ var deltaTime = 0;
 animate();
 
 function spawnBullet(vel) {
+    var MainChar = scene.getObjectByName("Main_Char");
     var bullet = new THREE.Mesh(
         new THREE.SphereGeometry(1, 8, 8),
         new THREE.MeshBasicMaterial({ color: 0xffffff })
     );
-    bullet.position.set(cube.position.x, cube.position.y, cube.position.z)
+    bullet.position.set(MainChar.position.x, MainChar.position.y, MainChar.position.z)
 
     bullet.velocity = vel;
 

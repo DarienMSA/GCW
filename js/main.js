@@ -1,65 +1,17 @@
-class EnemyClass {
-    constructor(Mesh, posX, posZ) {
-        
-        this.enemy = Mesh;
-        this.enemy.alive = true;
-        this.enemy.position.x = posX;
-        this.enemy.position.z = posZ;
-        this.health = 500;
-    }
 
-    updateEnemy() {
-        if (!this.enemy.alive)
-            return;
-        var MainChar = scene.getObjectByName("Main_Char");
-        
-        let disX = MainChar.position.x - this.enemy.position.x;
-        let disZ = MainChar.position.z - this.enemy.position.z;
 
-        var hyp = Math.sqrt(disX * disX + disZ * disZ);
-        //if(hyp < 20){
-        disX /= hyp;
-        disZ /= hyp;
-
-        this.enemy.position.x += disX * 0.5 * .1;
-        this.enemy.position.z += disZ * 0.5 * .1;
-
-        this.enemy.lookAt(MainChar.position)
-        //}
-    }
-
-    hitByBullet(b, scene) {
-        if (!this.enemy.alive)
-            return;
-        if (b.position.x >= this.enemy.position.x - 5 && b.position.x <= this.enemy.position.x + 5 &&
-            b.position.z >= this.enemy.position.z - 5 && b.position.z <= this.enemy.position.z + 5) {
-            console.log(this.enemy.position);
-            b.alive = false;
-            scene.remove(b);
-            this.health--;
-            if (this.health == 0) {
-                this.enemy.alive = false;
-                scene.remove(this.enemy);
-                delete (this);
-            }
-        }
-    }
-}
-
-var objs = [];
 var Main_Objs = []
 var enemies = [];
-var EnemyAnts = [];
-var loader = new THREE.FBXLoader();
+
+
 var pause = false;
+var enemyGen = new EnemyGenerator();
+var objs = [];
+var loader = new THREE.FBXLoader();
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(new THREE.Color(255, .2, 255));
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+
+
 
 const geometry = new THREE.BoxGeometry(5, 5, 5);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -67,20 +19,20 @@ const cube = new THREE.Mesh(geometry, material);
 
 const enemymaterial = new THREE.MeshBasicMaterial({ color: RandomColor() });
 const enemycube = new THREE.Mesh(geometry, enemymaterial);
-scene.add(cube);
+gameApp.scene.add(cube);
 
 var ambient = new THREE.AmbientLight(new THREE.Color(1, 1, 1), 1.0);
-scene.add(ambient);
+gameApp.scene.add(ambient);
 
 var directional = new THREE.DirectionalLight(new THREE.Color(1, 0 ,1), 0.5);
 directional.position.set(0, 0, 1);
-scene.add(directional);
+gameApp.scene.add(directional);
 
 
-loader.load('../Assets/Modelos/EnemyAnt.fbx', function (EnemyAnt) {
+loader.load(enemyURL.ANT, function (EnemyAnt) {
     EnemyAnt.mixer = new THREE.AnimationMixer(EnemyAnt);
     EnemyAnt.scale.set(.02, .015, .015);
-    var clone = EnemyAnt.children[1];
+   
     //EnemyAnts.position.y = 1;
     //EnemyAnt.rotation.x= THREE.Math.degToRad(90);
     var action = EnemyAnt.mixer.clipAction(EnemyAnt.animations[0]);
@@ -94,15 +46,18 @@ loader.load('../Assets/Modelos/EnemyAnt.fbx', function (EnemyAnt) {
             child.castShadow = true;
             child.receiveShadow = true;
         }
-    });
-    for (var ant = 0; ant <= 1; ant++) {
-        var NewEnemies = new EnemyClass(EnemyAnt, RandomSpawnX(), RandomSpawnY());
-        EnemyAnts.push(NewEnemies);
-    }
-    for(i = 0; i <= EnemyAnts.length; i++){
-        scene.add(EnemyAnts[i].enemy);
-    }  
+    }); 
+    enemyGen.setEnemy(enemyType.ANT, EnemyAnt);
+
+
+    gameApp.scene.add(EnemyAnt)
+    
+    
+    
 });
+
+//EnemyAnts.push(new EnemyClass(enemyGen.getEnemy(enemyType.ANT), RandomSpawnX(), RandomSpawnY()));
+
 
 
 
@@ -117,7 +72,8 @@ loader.load('../Assets/Modelos/Character/Walking.fbx', function (MainChar) {
     action.setLoop(THREE.Looponce)
     action.timescale = 500;
     Main_Objs.push(MainChar.mixer);
-    scene.add(MainChar);
+    gameApp.scene.add(MainChar);
+    gameApp.ready--;
 });
 
 //const redCube = new EnemyClass(new THREE.Mesh(geometry, new THREE.MeshBasicMaterial( { color: 0xff0000 } )), 0, 40);
@@ -139,8 +95,8 @@ plane.rotation.x = THREE.Math.degToRad(-90);
 plane.position.y -= 20;
 //scene.add(plane);
 
-camera.position.y = 100;
-camera.lookAt(plane.position);
+gameApp.camera.position.y = 100;
+gameApp.camera.lookAt(plane.position);
 
 var target = new THREE.Vector3();
 
@@ -157,9 +113,9 @@ var moveRight = false;
 var bullets = [];
 
 function resize() {
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    gameApp.renderer.setSize(window.innerWidth, window.innerHeight);
+    gameApp.camera.aspect = window.innerWidth / window.innerHeight;
+    gameApp.camera.updateProjectionMatrix();
 
     windowHalfX = window.innerWidth / 2;
     windowHalfY = window.innerHeight / 2;
@@ -253,7 +209,7 @@ function onDocumentMouseMove(event) {
 
 
 function onDocumentKeyDown(event) {
-    let MainChar = scene.getObjectByName("Main_Char");
+    let MainChar = gameApp.scene.getObjectByName("Main_Char");
     switch (event.code) {
         case 'KeyW':
             MainChar.rotation.y = 135;
@@ -359,10 +315,10 @@ function animate() {
     requestAnimationFrame(animate);
     resize();
 
-    var MainChar = scene.getObjectByName("Main_Char");
     
-    if (!pause) {
 
+    if (!pause && gameApp.ready == 0) {
+        var MainChar = gameApp.scene.getObjectByName("Main_Char");
         deltaTime = clock.getDelta();
         //object.position.z += speed * delta;
 
@@ -394,13 +350,13 @@ function animate() {
 
         //redCube.updateEnemy();
         //blueCube.updateEnemy();
-
         for (i = 0; i < EnemyAnts.length; i++) { EnemyAnts[i].updateEnemy(); }
         //for(i = 0; i < enemies.length; i++) { enemies[i].updateEnemy(); }
-
+        
         if (moveForward) {
             
             MainChar.position.z -= 2.7 * .1;
+            
         }
         if (moveBackward) {
             
@@ -426,10 +382,10 @@ function animate() {
             //redCube.hitByBullet(bullets[index], scene);
             //blueCube.hitByBullet(bullets[index], scene);
 
-            for (i = 0; i < EnemyAnts.length; i++) { EnemyAnts[i].hitByBullet(bullets[index], scene); }
+            for (i = 0; i < EnemyAnts.length; i++) { EnemyAnts[i].hitByBullet(bullets[index], gameApp.scene); }
             //for(i = 0; i < enemies.length; i++) { enemies[i].hitByBullet(bullets[index], scene); }
         }
-        renderer.render(scene, camera);
+        gameApp.renderer.render(gameApp.scene, gameApp.camera);
     }
 }
 
@@ -437,10 +393,11 @@ var clock = new THREE.Clock();
 var speed = 2;
 var deltaTime = 0;
 
-animate();
+
+    animate();
 
 function spawnBullet(vel) {
-    var MainChar = scene.getObjectByName("Main_Char");
+    var MainChar = gameApp.scene.getObjectByName("Main_Char");
     var bullet = new THREE.Mesh(
         new THREE.SphereGeometry(1, 8, 8),
         new THREE.MeshBasicMaterial({ color: 0xffffff })
@@ -453,11 +410,11 @@ function spawnBullet(vel) {
     setTimeout(
         function () {
             bullet.alive = false;
-            scene.remove(bullet);
+            gameApp.scene.remove(bullet);
         },
         2000);
     bullets.push(bullet);
-    scene.add(bullet);
+    gameApp.scene.add(bullet);
 }
 
 

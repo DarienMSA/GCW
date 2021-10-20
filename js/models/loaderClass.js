@@ -1,19 +1,19 @@
-class LoaderFbxClass{
+class LoaderFbxClass {
     static instance;
-    constructor(){
-        if(!!LoaderFbxClass.instance){
+    constructor() {
+        if (!!LoaderFbxClass.instance) {
             return LoaderFbxClass.instance;
         }
         LoaderFbxClass.instance = this;
         this.loader = new THREE.FBXLoader();
-        
+
     }
 
-    loadFbx(url){
+    loadFbx(url) {
         loader.load(url, function (model) {
             model.mixer = new THREE.AnimationMixer(model);
             model.scale.set(.02, .015, .015);
-           
+
             //EnemyAnts.position.y = 1;
             //EnemyAnt.rotation.x= THREE.Math.degToRad(90);
             var action = model.mixer.clipAction(model.animations[0]);
@@ -28,15 +28,15 @@ class LoaderFbxClass{
                     child.receiveShadow = true;
                 }
             });
-        
-               
+
+
             //enemyGen.setEnemy(enemyType.ANT, EnemyAnt);
-        
+
             var clone = SkeletonUtils.clone(model);
-        
+
             gameApp.scene.add(clone)
-            
-            
+
+
         });
     }
 

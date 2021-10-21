@@ -3,8 +3,8 @@ var spawnRoundOne = (function () {
     return function () {
         if (!executed) {
             executed = true;
-            spawnSpiderBaby(3, 10, -9)
-            spawnAnts(6, 20, -5);
+            spawnSpiderBaby(1, 10, -9)
+            spawnAnts(1, 20, -5);
         }
     };
 })();

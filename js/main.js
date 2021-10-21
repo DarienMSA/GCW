@@ -6,6 +6,14 @@ loadSceneThree();
 
 
 
+
+gameAudio.play();
+
+
+
+
+
+
 function animate() {
     requestAnimationFrame(animate);
     gameApp.resize();
@@ -67,6 +75,7 @@ function animate() {
                     Players[index].frames360 = 0
 
                 if (Players[index].attacked) {
+                    hit.play();
                     Players[index].model.scale.set(Math.abs(Math.cos(Players[index].frames360) * 3), 2, Math.abs(Math.sin(Players[index].frames360) * 3));
                 }
                 else {
@@ -121,6 +130,7 @@ function animate() {
 
         if (!gameApp.firstSceneComplete) {
             if (gameApp.scenary1 == 0) {
+
                 runFirstScene()
             }
         } else if (!gameApp.secondSceneComplete) {

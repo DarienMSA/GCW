@@ -1,3 +1,13 @@
+var gameAudio = new Audio('../Assets/Sonidos/Cartoon_Suspense.mp3');
+gameAudio.volume = 0.15;
+gameAudio.loop = true;
+
+
+var hit = new Audio('../Assets/Sonidos/MC_hitF.mp3');
+hit.volume = 0.18;
+
+
+
 class GameApp {
     static instance;
 

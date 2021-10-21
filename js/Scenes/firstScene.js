@@ -1,5 +1,10 @@
 
 
+var BossAudio = new Audio('../Assets/Sonidos/Boss.mp3');
+BossAudio.volume = 0.25;
+BossAudio.loop = true;
+
+
 
 var loadBee = (function () {
     var executed = false;
@@ -393,6 +398,8 @@ function runFirstScene() {
     if (rounds[0] == true && rounds[1] == true && rounds[2] == false) {
 
         spawnBee();
+        gameAudio.volume = 0;
+        BossAudio.play();
 
         for (i = 0; i < EnemyBees.length; i++) {
 
@@ -409,6 +416,8 @@ function runFirstScene() {
         EnemyBees[i].updateEnemy()
 
         if (!EnemyBees[i].enemy.alive) {
+            BossAudio.pause();
+            gameAudio.volume = 0.15;
             EnemyBees[i].die(i)
         }
         if (EnemyBees[i].canDelete) {

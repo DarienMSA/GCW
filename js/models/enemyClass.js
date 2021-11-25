@@ -33,6 +33,7 @@ class EnemyClass {
         this.canShoot = 0;
         this.shootCooldown = _shootCooldown;
         this.onStage = false;
+        this.deathSound = randomDeathSound();
     }
 
     updateEnemy() { }
@@ -168,6 +169,7 @@ class AntClass extends EnemyClass {
             gameApp.scene.remove(b);
             this.health -= b.damage;
             if (this.health <= 0) {
+                this.deathSound.playAudio();
                 this.enemy.alive = false;
                 if (roundsReady[0] != 0)
                     roundsReady[0]--;
@@ -175,7 +177,7 @@ class AntClass extends EnemyClass {
                     roundsReady[1]--;
                 else if (roundsReady[2] != 0)
                     roundsReady[2]--;
-                console.log("El jugador: " + b.from + " ha derrotado a un enemigo!")
+                Players[b.from].score += 100;
             }
             return false;
         }
@@ -264,6 +266,8 @@ class BeeClass extends EnemyClass {
             gameApp.scene.remove(b);
             this.health -= b.damage;
             if (this.health <= 0) {
+                this.deathSound.playAudio();
+
                 this.enemy.alive = false;
                 if (roundsReady[0] != 0)
                     roundsReady[0]--;
@@ -271,7 +275,8 @@ class BeeClass extends EnemyClass {
                     roundsReady[1]--;
                 else if (roundsReady[2] != 0)
                     roundsReady[2]--;
-                console.log("El jugador: " + b.from + " ha derrotado a un enemigo!")
+
+                Players[b.from].score += 200;
             }
             return false;
         }
@@ -431,6 +436,8 @@ class SpiderClass extends EnemyClass {
             gameApp.scene.remove(b);
             this.health -= b.damage;
             if (this.health <= 0) {
+                this.deathSound.playAudio();
+
                 this.enemy.alive = false;
                 if (roundsReady[0] != 0)
                     roundsReady[0]--;
@@ -438,7 +445,8 @@ class SpiderClass extends EnemyClass {
                     roundsReady[1]--;
                 else if (roundsReady[2] != 0)
                     roundsReady[2]--;
-                console.log("El jugador: " + b.from + " ha derrotado a un enemigo!")
+
+                Players[b.from].score += 130;
             }
             return false;
         }
@@ -544,6 +552,8 @@ class BossClass extends EnemyClass {
             gameApp.scene.remove(b);
             this.health -= b.damage;
             if (this.health <= 0) {
+                this.deathSound.playAudio();
+
                 this.enemy.alive = false;
 
                 let WalkAnimation = this.enemy.mixer._actions[0];
@@ -558,7 +568,8 @@ class BossClass extends EnemyClass {
                     roundsReady[1]--;
                 else if (roundsReady[2] != 0)
                     roundsReady[2]--;
-                console.log("El jugador: " + b.from + " ha derrotado a un enemigo!")
+
+                Players[b.from].score += 250;
             }
             return false;
         }
@@ -700,7 +711,6 @@ function doDamageToPlayer(e, p) {
         p.alive = false
         p.model.scale.set(2, 2, 2);
         gameApp.scene.remove(p.model);
-        delete (p.model)
     }
 
 
@@ -717,4 +727,14 @@ function doDamageToPlayer(e, p) {
         }, "fast");
     }
 
+}
+
+function randomDeathSound() {
+    let random = gameApp.random1_2();
+    if (random == 1) {
+        return new AudioClassASG('../Assets/Sonidos/enemyDeath1.mp3', false, 0.15);
+    } else {
+        return new AudioClassASG('../Assets/Sonidos/enemyDeath2.mp3', false, 0.15);
+
+    }
 }

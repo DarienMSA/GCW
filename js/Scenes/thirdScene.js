@@ -52,8 +52,20 @@ var killBoss = (function () {
     return function () {
         if (!executed) {
             executed = true;
+
             setTimeout(function () {
                 EnemyBosses[0].canDelete = true;
+
+
+                setTimeout(function () {
+                    gameApp.BossAudio.audio.pause();
+                    gameApp.victory.playAudio();
+                    gameApp.clicAudio.playAudio();
+                    $("#score1").text(Math.floor(Players[0].score - (Math.floor(timeCounter))));
+
+                    $("#endgame1").modal("show");
+                    gameApp.pause = true;
+                }, 2000)
             }, 7000)
         }
     };
@@ -104,11 +116,13 @@ function runThirdScene() {
 
 
                 setTimeout(function () {
+
+
                     EnemyBosses[index].canAttack = true
                     EnemyBosses[index].onStage = true;
                     bossPatternSetter();
 
-                }, 1000)
+                }, 500)
 
             }
 

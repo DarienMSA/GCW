@@ -53,6 +53,29 @@ canvas {
   left: 160px;
 }
 
+.inputname {
+  position: absolute;
+  top: 270px;
+  left: 220px;
+}
+
+.score {
+  position: absolute;
+  top: 270px;
+  left: 480px;
+}
+
+.facebookBtn {
+  position: absolute;
+  top: 350px;
+  left: 220px;
+}
+.continuebtn {
+  position: absolute;
+  top: 330px;
+  left: 470px;
+}
+
 .progress {
   transform: scale(1.5);
   background-image: url("../Assets/Botones/Barra_fondo.png");

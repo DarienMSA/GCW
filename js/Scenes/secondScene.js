@@ -40,7 +40,8 @@ var changeScene2_3 = (function () {
     return function () {
         if (!executed) {
             executed = true;
-
+            gameApp.gameAudio.audio.volume = 0;
+            gameApp.BossAudio.playAudio();
 
             gameApp.secondSceneComplete = true;
             gameApp.scene.remove(gameApp.scene.getObjectByName("2Floor"));
@@ -60,12 +61,17 @@ var changeScene2_3 = (function () {
 
             for (let index = 0; index < Players.length; index++) {
                 Players[index].model.position.y = 0;
-                if (Players[index].index == 0) {
-                    Players[index].model.position.z = 40
-                    Players[index].model.position.x = -42
+                if (playersAmount == 1) {
+                    Players[index].model.position.z = 0
+                    Players[index].model.position.x = 0
                 } else {
-                    Players[index].model.position.z = 40
-                    Players[index].model.position.x = 42
+                    if (Players[index].index == 0) {
+                        Players[index].model.position.z = 0
+                        Players[index].model.position.x = -42
+                    } else {
+                        Players[index].model.position.z = 0
+                        Players[index].model.position.x = 42
+                    }
                 }
 
             }
@@ -80,7 +86,7 @@ var changeScene2_3 = (function () {
     };
 })();
 
-
+var roundsSecondScene = [false, false, false];
 
 function runSecondScene() {
     spawnRoundOne()
@@ -143,13 +149,77 @@ function runSecondScene() {
     }
 
     if (rounds[0] == true && rounds[1] == false && rounds[2] == false) {
-        spawnRoundTwo()
+        if (roundsSecondScene[0] == false) spawnPowerUps();
+
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                spawnRoundTwo()
+                if (roundsSecondScene[0] == false) {
+                    roundsSecondScene[0] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+            }
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                spawnRoundTwo()
+                if (roundsSecondScene[0] == false) {
+                    roundsSecondScene[0] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
+            }
+        }
     }
 
     if (rounds[0] == true && rounds[1] == true && rounds[2] == false) {
-        spawnRoundThree()
+
+        if (roundsSecondScene[1] == false) spawnPowerUps();
+
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                spawnRoundThree()
+                if (roundsSecondScene[1] == false) {
+                    roundsSecondScene[1] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+            }
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                spawnRoundThree()
+                if (roundsSecondScene[1] == false) {
+                    roundsSecondScene[1] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
+            }
+        }
     }
     if (rounds[0] == true && rounds[1] == true && rounds[2] == true) {
-        setTimeout(changeScene2_3, 3000)
+        if (roundsSecondScene[2] == false) spawnPowerUps();
+
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                setTimeout(changeScene2_3, 3000)
+                if (roundsSecondScene[2] == false) {
+                    roundsSecondScene[2] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+            }
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                setTimeout(changeScene2_3, 3000)
+                if (roundsSecondScene[2] == false) {
+                    roundsSecondScene[2] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
+            }
+        }
     }
 }

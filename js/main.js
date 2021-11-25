@@ -1,65 +1,62 @@
-
-loadSceneOne()
-loadSceneTwo();
-loadSceneThree();
-
-
-
-
-
-gameAudio.play();
-
-
-
-
-
+var timeCounter = 0;
 
 function animate() {
     requestAnimationFrame(animate);
     gameApp.resize();
-
+    gameApp.deltaTime = gameApp.clock.getDelta();
     if (!gameApp.pause && gameApp.scenary1 == 0) {
-        gameApp.deltaTime = gameApp.clock.getDelta();
+        timeCounter += gameApp.deltaTime;
+        console.log(Math.floor(timeCounter))
 
 
-        if (!Players[0].alive && !Players[1].alive) {
-            gameApp.pause = true;
-            return;
+        if (playersAmount == 1) {
+            if (!Players[0].alive) {
+
+                gameApp.clicAudio.playAudio();
+                $("#score1").text(Math.floor(Players[0].score - (Math.floor(timeCounter))));
+
+                $("#endgame1").modal("show");
+                gameApp.pause = true;
+                return;
+            }
+        } else {
+            if (!Players[0].alive && !Players[1].alive) {
+                gameApp.clicAudio.playAudio();
+                $("#score1").text(Math.floor(Players[0].score - (Math.floor(timeCounter))));
+
+                $("#endgame1").modal("show");
+                gameApp.pause = true;
+                return;
+            }
+
         }
 
 
 
+        for (let index = 0; index < powerUps.length; index++) {
+            powerUps[index].particleSystem.rotation.y += THREE.Math.degToRad(700 * gameApp.deltaTime);
+            powerUps[index].particleSystem.rotation.x += THREE.Math.degToRad(400 * gameApp.deltaTime);
+            powerUps[index].particleSystem.rotation.z += THREE.Math.degToRad(550 * gameApp.deltaTime);
+            powerUps[index].cube.rotation.y += THREE.Math.degToRad(700 * gameApp.deltaTime);
+            powerUps[index].cube.rotation.x += THREE.Math.degToRad(400 * gameApp.deltaTime);
+            powerUps[index].cube.rotation.z += THREE.Math.degToRad(550 * gameApp.deltaTime);
+            for (let i = 0; i < Players.length; i++) {
+                powerUps[index].getPowerUp(Players[i]);
 
+            }
+            if (powerUps[index].canDelete) {
+                gameApp.scene.remove(powerUps[index].particleSystem)
+                gameApp.scene.remove(powerUps[index].cube)
+                powerUps.splice(index, 1);
+            }
+        }
 
-        //180 pa empezar
-
-        /*
-        angle += 0.005
-        if (angle >= 360)
-            angle = 0
-        
-        cube.position.x = (Math.cos(angle) * 100)                                 //patrón de disparos 1
-    
-            if(cube.canShoot > 0)
-                cube.canShoot -= 1;
-            
-            spawnBulletEnemy(cube, new THREE.Vector3(
-                Math.sin(frames) * 100 * gameApp.deltaTime,
-                0,
-                -Math.cos(frames) * 100 * gameApp.deltaTime
-            ))
-    
-            if(!Players[0].alive && !Players[1].alive)
-                pause = true;
-    
-            if (objs.length > 0) {
-                for (var i = 0; i < objs.length; i++) {
-                    objs[i].update(gameApp.deltaTime);
-                }
-            }*/
 
         for (let index = 0; index < Players.length; index++) {
             if (Players[index].alive) {
+
+
+
                 Players[index].gamepadDetecter()
                 Players[index].movementPlayer()
 
@@ -75,7 +72,7 @@ function animate() {
                     Players[index].frames360 = 0
 
                 if (Players[index].attacked) {
-                    hit.play();
+                    gameApp.hit.playAudio();
                     Players[index].model.scale.set(Math.abs(Math.cos(Players[index].frames360) * 3), 2, Math.abs(Math.sin(Players[index].frames360) * 3));
                 }
                 else {
@@ -144,10 +141,186 @@ function animate() {
     }
 }
 
+var loader = new THREE.FBXLoader();
+
+$(document).ready(function () {
+
+
+    gameApp.setupApp();
+
+    playersAmount = $("#playersAmount").text();
+
+    if (playersAmount == 1) {
+        $("#player2-health").hide();
+        gameApp.scenary1--;
+    }
+
+    for (let index = 0; index < playersAmount; index++) {
+        loader.load('../Assets/Modelos/Character/Walking.fbx', function (MainChar) {
+            MainChar.mixer = new THREE.AnimationMixer(MainChar);
+            MainChar.scale.set(2, 2, 2);
+            MainChar.name = "Player" + index;
+
+            var action = MainChar.mixer.clipAction(MainChar.animations[0]);
+            action.play();
+            action.setLoop(THREE.Looponce)
+            action.timescale = 500;
+
+            let controller = 0
+            if (playersAmount == 1) {
+                MainChar.position.x = 0
+                controller = 3;
+            } else {
+                if (index == 0) {
+                    controller = 1 //keyboard
+                    MainChar.position.x = -42
+                } else if (index == 1) {
+                    controller = 2 //gamepad
+                    MainChar.position.x = 42
+                }
+            }
+            let player = new Player(MainChar, index, controller)
+            Players.push(player)
+            gameApp.scene.add(player.model);
+            Players[index].frames.push(MainChar.mixer);
+            gameApp.scenary1--;
+        });
+
+    }
+
+    document.addEventListener('keydown', onDocumentKeyDown, false);
+    document.addEventListener('keyup', onDocumentKeyUp, false);
 
 
 
-animate();
+    $("#btnPause").click(function () {
+        gameApp.pause = true;
+    })
+
+    $("#btnResume").click(function () {
+        gameApp.pause = false;
+    })
+
+    $("#btnMainMenu").click(function () {
+        window.location.href = "index.php";
+    })
+
+    $(window).blur(function () {
+        for (let index = 0; index < Players.length; index++) {
+            Players[index].moveRight = false;
+            Players[index].moveBackward = false;
+            Players[index].moveLeft = false;
+            Players[index].moveForward = false;
+
+        }
+
+    });
+
+
+
+    loadSceneOne()
+    loadSceneTwo();
+    loadSceneThree();
+    gameApp.gameAudio.playAudio();
+    animate();
+
+    $("#btnResume").click(function () {
+        $("#pauseModal").modal("hide");
+        gameApp.pause = false;
+    })
+
+    $("#continuebtn1").click(function () {
+        let name = $("#inputname1").val();
+        if (name == "") {
+            alert("Escribe el nombre de usuario.");
+        } else {
+            if (playersAmount == 1) {
+                $.ajax({
+                    dataType: "JSON",
+                    method: "POST",
+                    url: "../controllers/insertScoreController.php",
+                    data: {
+                        "name": name,
+                        "score": (Players[0].score - (Math.floor(timeCounter)))
+                    },
+                    success: function (result) {
+                        window.location.href = "index.php";
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+            } else {
+
+                $.ajax({
+                    dataType: "JSON",
+                    method: "POST",
+                    url: "../controllers/insertScoreController.php",
+                    data: {
+                        "name": name,
+                        "score": (Players[0].score - (Math.floor(timeCounter)))
+                    },
+                    success: function (result) {
+                        $("#endgame1").modal("hide");
+                        gameApp.clicAudio.playAudio();
+                        $("#score2").text(Math.floor(Players[1].score - (Math.floor(timeCounter))));
+                        $("#endgame2").modal("show");
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+
+
+            }
+        }
+
+    })
+
+    $("#continuebtn2").click(function () {
+        let name = $("#inputname2").val();
+        if (name == "") {
+            alert("Escribe el nombre de usuario.");
+        } else {
+            $.ajax({
+                dataType: "JSON",
+                method: "POST",
+                url: "../controllers/insertScoreController.php",
+                data: {
+                    "name": name,
+                    "score": (Players[1].score - (Math.floor(timeCounter)))
+                },
+                success: function (result) {
+                    window.location.href = "index.php";
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+    })
+
+    $("#facebookBtn1").click(function () {
+        facebookShare($("#score1").text())
+    })
+
+    $("#facebookBtn2").click(function () {
+        facebookShare($("#score2").text())
+    })
+
+})
+
+
+
+
+
+
+
+
+
+
 
 
 

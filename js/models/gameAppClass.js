@@ -1,11 +1,3 @@
-var gameAudio = new Audio('../Assets/Sonidos/Cartoon_Suspense.mp3');
-gameAudio.volume = 0.15;
-gameAudio.loop = true;
-
-
-var hit = new Audio('../Assets/Sonidos/MC_hitF.mp3');
-hit.volume = 0.18;
-
 
 
 class GameApp {
@@ -31,6 +23,18 @@ class GameApp {
         this.angle = 0;
 
         this.scenary1 = 9;
+        this.powerUpExecuted = false;
+
+        this.gameAudio = new AudioClassASG('../Assets/Sonidos/Cartoon_Suspense.mp3', true, 0.15);
+
+        this.BossAudio = new AudioClassASG('../Assets/Sonidos/Boss.mp3', true, 0.25);
+
+
+        this.hit = new AudioClassASG('../Assets/Sonidos/MC_hitF.mp3', false, 0.18);
+
+        this.clicAudio = new AudioClassASG('../Assets/Sonidos/Clic.mp3', false, 0.5);
+
+        this.victory = new AudioClassASG('../Assets/Sonidos/victory.mp3', false, 0.5);
 
     }
 
@@ -92,6 +96,10 @@ class GameApp {
         return z;
     }
 
+    getRandomMinMax(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
     RandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
@@ -109,4 +117,3 @@ class GameApp {
 
 
 const gameApp = new GameApp();
-gameApp.setupApp();

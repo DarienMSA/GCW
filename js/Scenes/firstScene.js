@@ -1,8 +1,6 @@
 
 
-var BossAudio = new Audio('../Assets/Sonidos/Boss.mp3');
-BossAudio.volume = 0.25;
-BossAudio.loop = true;
+
 
 
 
@@ -15,8 +13,7 @@ var loadBee = (function () {
                 EnemyBee.mixer = new THREE.AnimationMixer(EnemyBee);
                 EnemyBee.scale.set(.04, .04, .04);
 
-                //EnemyAnts.position.y = 1;
-                //EnemyAnt.rotation.x= THREE.Math.degToRad(90);
+
                 var action = EnemyBee.mixer.clipAction(EnemyBee.animations[0]);
                 action.play();
                 action.setLoop(THREE.Looponce)
@@ -28,22 +25,18 @@ var loadBee = (function () {
                         child.receiveShadow = true;
                     }
                 });
-                //enemyGen.setEnemy(enemyType.ANT, EnemyAnt);
+
                 let enemy = new BeeClass(EnemyBee, 0, 0, -100, 100, 10, 10);
-                //enemy.enemy.position.y = -30
+
                 EnemyBees.push(enemy);
                 EnemyBees[0].frames.push(EnemyBee.mixer);
-                //gameApp.scene.add(enemy.enemy)
-
-
-                //gameApp.ready--;
-
-
 
             });
         }
     };
 })();
+
+var beeSpawn = false;
 
 var spawnBee = (function () {
     var executed = false;
@@ -61,7 +54,7 @@ var spawnAntsRound2 = (function () {
     return function () {
         if (!executed) {
             executed = true;
-            spawnAnts(2, 15, 0)
+            spawnAnts(3, 15, 0)
         }
     };
 })();
@@ -111,12 +104,17 @@ var changeScene1_2 = (function () {
 
             for (let index = 0; index < Players.length; index++) {
                 Players[index].model.position.y -= 10;
-                if (Players[index].index == 0) {
+                if (playersAmount == 1) {
                     Players[index].model.position.z = 0
-                    Players[index].model.position.x = -42
+                    Players[index].model.position.x = 0
                 } else {
-                    Players[index].model.position.z = 0
-                    Players[index].model.position.x = 42
+                    if (Players[index].index == 0) {
+                        Players[index].model.position.z = 0
+                        Players[index].model.position.x = -42
+                    } else {
+                        Players[index].model.position.z = 0
+                        Players[index].model.position.x = 42
+                    }
                 }
 
             }
@@ -230,7 +228,7 @@ var loadSceneThree = (function () {
                 Mesh.scale.set(1, 1, 1);
                 console.log("Laboratorio cargado")
                 Mesh.name = "Lab"
-                //gameApp.scene.add(Mesh);
+
                 gameApp.sceneAux.add(Mesh)
 
 
@@ -309,22 +307,11 @@ function loadSceneOne() {
         gameApp.scenary1--;
 
     });
-    /*loader.load(enemyURL.ANT, function (EnemyAnt) {
-        EnemyAnt.scale.set(.02, .015, .015);
-        for (let index = 0; index < enemyCount.ANT; index++) {
-            let enemy = new AntClass(EnemyAnt.clone(), gameApp.RandomSpawnX(), gameApp.RandomSpawnY());
-            EnemyAnts.push(enemy);
-            gameApp.scene.add(enemy.enemy)
-            gameApp.scenary1--;
-        }
-    });*/
     for (let index = 0; index < enemyCount.ANT; index++) {
         loader.load(enemyURL.ANT, function (EnemyAnt) {
             EnemyAnt.mixer = new THREE.AnimationMixer(EnemyAnt);
             EnemyAnt.scale.set(.02, .015, .015);
 
-            //EnemyAnts.position.y = 1;
-            //EnemyAnt.rotation.x= THREE.Math.degToRad(90);
             var action = EnemyAnt.mixer.clipAction(EnemyAnt.animations[0]);
             action.play();
             action.setLoop(THREE.Looponce)
@@ -336,7 +323,7 @@ function loadSceneOne() {
                     child.receiveShadow = true;
                 }
             });
-            //enemyGen.setEnemy(enemyType.ANT, EnemyAnt);
+
             let enemy = new AntClass(EnemyAnt, gameApp.RandomSpawnX(), 0, gameApp.RandomSpawnY(), 0, 2, 15);
             enemy.onStage = true;
             EnemyAnts.push(enemy);
@@ -352,6 +339,9 @@ function loadSceneOne() {
     }
 
 }
+
+var roundsFirstScene = [false, false, false];
+
 
 function runFirstScene() {
     loadBee();
@@ -391,23 +381,71 @@ function runFirstScene() {
     }
 
     if (rounds[0] == true && rounds[1] == false && rounds[2] == false) {
-        enemyCount.ANT = 6
-        spawnAntsRound2()
+        if (roundsFirstScene[0] == false) spawnPowerUps();
+
+
+
+
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                enemyCount.ANT = 6
+                spawnAntsRound2();
+                if (roundsFirstScene[0] == false) {
+                    roundsFirstScene[0] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+            }
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                enemyCount.ANT = 6
+                spawnAntsRound2();
+                if (roundsFirstScene[0] == false) {
+                    roundsFirstScene[0] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
+            }
+        }
     }
 
     if (rounds[0] == true && rounds[1] == true && rounds[2] == false) {
+        if (roundsFirstScene[1] == false) spawnPowerUps();
 
-        spawnBee();
-        gameAudio.volume = 0;
-        BossAudio.play();
 
-        for (i = 0; i < EnemyBees.length; i++) {
 
-            if (EnemyBees[i].enemy.position.z <= -20) {
-                EnemyBees[i].enemy.position.z += 20 * gameApp.deltaTime;
-                if (EnemyBees[i].enemy.position.z >= -20)
-                    EnemyBees[i].canAttack = true
-                EnemyBees[i].onStage = true;
+
+
+
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                spawnBee();
+                gameApp.gameAudio.audio.volume = 0;
+                gameApp.BossAudio.playAudio();
+
+                if (roundsFirstScene[1] == false) {
+                    roundsFirstScene[1] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+
+            }
+
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                spawnBee();
+                gameApp.gameAudio.audio.volume = 0;
+                gameApp.BossAudio.playAudio();
+
+
+
+                if (roundsFirstScene[1] == false) {
+                    roundsFirstScene[1] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
             }
         }
     }
@@ -416,12 +454,21 @@ function runFirstScene() {
         EnemyBees[i].updateEnemy()
 
         if (!EnemyBees[i].enemy.alive) {
-            BossAudio.pause();
-            gameAudio.volume = 0.15;
+            gameApp.BossAudio.audio.pause();
+            gameApp.gameAudio.audio.volume = 0.15;
             EnemyBees[i].die(i)
         }
         if (EnemyBees[i].canDelete) {
             killerCountBee++;
+        }
+
+        if (beeSpawn == true) {
+            if (EnemyBees[i].enemy.position.z <= -20) {
+                EnemyBees[i].enemy.position.z += 20 * gameApp.deltaTime;
+                if (EnemyBees[i].enemy.position.z >= -20)
+                    EnemyBees[i].canAttack = true
+                EnemyBees[i].onStage = true;
+            }
         }
     }
 
@@ -438,8 +485,29 @@ function runFirstScene() {
         killerCountBee = 0
 
     if (rounds[0] == true && rounds[1] == true && rounds[2] == true) {
+        if (roundsFirstScene[2] == false) spawnPowerUps();
 
-        setTimeout(changeScene1_2, 3000)
+        if (playersAmount == 1) {
+            if (Players[0].hasPowerUp) {
+                setTimeout(changeScene1_2, 3000);
+                if (roundsFirstScene[2] == false) {
+                    roundsFirstScene[2] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+            }
+        } else {
+            if (Players[0].hasPowerUp && Players[1].hasPowerUp) {
+                setTimeout(changeScene1_2, 3000);
+                if (roundsFirstScene[2] == false) {
+                    roundsFirstScene[2] = true;
+                    gameApp.powerUpExecuted = false;
+                }
+                Players[0].hasPowerUp = false;
+                Players[1].hasPowerUp = false;
+            }
+        }
+
     }
 
 
